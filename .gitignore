@@ -5,8 +5,12 @@
 /.pnp
 .pnp.js
 
+/old
+
+
 # testing
 /coverage
+
 
 # next.js
 /.next/
