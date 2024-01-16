@@ -16,11 +16,15 @@ export default function Search({ placeholder }: { placeholder: string }) {
     console.log(`Searching... ${term}`);
    
     const params = new URLSearchParams(searchParams);
+   
+    
     if (term) {
       params.set('query', term);
     } else {
       params.delete('query');
     }
+ console.log('params-->',params.toString());
+
     replace(`${pathname}?${params.toString()}`);
   }, 1000);
 
