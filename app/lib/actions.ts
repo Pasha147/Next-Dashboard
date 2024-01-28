@@ -6,6 +6,9 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+
 const FormSchema = z.object({
     id: z.string(),
     customerId: z.string(),
@@ -18,14 +21,12 @@ const FormSchema = z.object({
 
 export async function createInvoice(formData: FormData) {
 
-
-
     const rawFormData = {
       customerId: formData.get('customerId'),
       amount: formData.get('amount'),
       status: formData.get('status'),
     };
-
+    // console.log(rawFormData);
     const { customerId, amount, status } = CreateInvoice.parse(rawFormData)
     
     const amountInCents = amount * 100;
@@ -41,7 +42,7 @@ export async function createInvoice(formData: FormData) {
 
     //  const rawFormData = Object.fromEntries(formData.entries())
     // Test it out :
-    console.log(customerId, amount, status);  
+      
 }
 
 // Use Zod to update the expected types
@@ -71,4 +72,24 @@ export async function updateInvoice(id: string, formData: FormData) {
 export async function deleteInvoice(id: string) {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
+  }
+
+
+  export async function authenticate(
+    prevState: string | undefined,
+    formData: FormData,
+  ) {
+    try {
+      await signIn('credentials', formData);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        switch (error.type) {
+          case 'CredentialsSignin':
+            return 'Invalid credentials.';
+          default:
+            return 'Something went wrong.';
+        }
+      }
+      throw error;
+    }
   }
